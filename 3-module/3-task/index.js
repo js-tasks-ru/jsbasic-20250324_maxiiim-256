@@ -1,13 +1,11 @@
-function camelize(str){
-  let newStr = str.split('-');
-  
-  for(let i = 1; i < newStr.length; i += 1 ){
-  newStr[i] = newStr[i].split('')
-  newStr[i][0] = newStr[i][0].toUpperCase();
-  newStr[i] = newStr[i].join('');
-  }
-  
-  newStr = newStr.join('');
-
-  return newStr
+function camelize(str) {
+  return str
+    .split('-') 
+    .map((item, index) => {
+      if (index === 0) return item;
+      return item[0].toUpperCase() + item.slice(1); 
+    })
+    .join(''); 
 }
+camelize('-webkit-transition');
+camelize('list-style-image');

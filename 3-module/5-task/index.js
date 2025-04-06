@@ -6,7 +6,8 @@ function getMinMax(str) {
     if(Number(str[i])) newStr.push(str[i])
   };
   
-  let result = {min: Math.min(...newStr), max: Math.max(...newStr)};
-
-  return result;
+  return {
+    min: Math.min(...newStr),
+    max: Math.max(...newStr)
+  };
 }
