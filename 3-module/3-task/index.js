@@ -7,5 +7,4 @@ function camelize(str) {
     })
     .join(''); 
 }
-camelize('-webkit-transition');
-camelize('list-style-image');
+
