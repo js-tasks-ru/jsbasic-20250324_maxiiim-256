@@ -16,46 +16,42 @@ export default class Modal {
             <h3 class="modal__title"></h3>
           </div>
 
-          
-
           <div class="modal__body"></div>
         </div>
       </div>`);
-
-      
-    const modal = this.elem.querySelector(".modal")
     
     const title = this.elem.querySelector(".modal__body");
     this.elem.querySelector(".modal__close").addEventListener('click', () => {
-      this.elem.querySelector(".modal__body").classList.remove("is-modal-open")
+      title.classList.remove("is-modal-open");
+      document.body.classList.remove("is-modal-open");
       this.elem.remove();
-    })
-
+    });
     this.onkeydown = this.onkeydown.bind(this);
-  }
+  };
   
-  
-
   open(){
-    const container = document.body.querySelector(".container");
-    container.append(this.elem);
-    container.querySelector(".modal__body").classList.add("is-modal-open");
+    document.body.append(this.elem);
+    // document.body.querySelector(".modal__body").classList.add("is-modal-open");
+    document.body.classList.add("is-modal-open");
     document.addEventListener('keydown', this.onkeydown);
-  }
+  };
   setTitle(text){
     this.elem.querySelector(".modal__title").textContent = text;
-  }
+  };
   setBody(node){
     const modalBody = this.elem.querySelector(".modal__body");
     modalBody.innerHTML = ''; 
     modalBody.append(node);   
-  }
+  };
   close(){
-    this.elem.querySelector(".modal__body").classList.remove("is-modal-open")
+    // this.elem.querySelector(".modal__body").classList.remove("is-modal-open")
+    document.body.classList.remove("is-modal-open");
     this.elem.remove();
     document.removeEventListener('keydown', this.onkeydown);
-  }
+  };
   onkeydown(event){
-    if(event.code === 'Escape') this.close();
+    if(event.code === 'Escape'){
+      this.close();
+    };
   };
 }
