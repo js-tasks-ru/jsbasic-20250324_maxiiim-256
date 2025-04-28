@@ -21,34 +21,36 @@ export default class StepSlider {
       const sliderStep = createElement(`
         <span></span>
         `);
-        if(i === value) sliderStep.classList.add('slider__step-active');
+      if(i === value) sliderStep.classList.add('slider__step-active');
       this.elem.querySelector('.slider__steps').append(sliderStep);
-    };
+    }
 
-    this.elem.addEventListener('click', (e) => {
-      const sliderRect = this.elem.getBoundingClientRect();
+    this.elem.addEventListener('click', this.onClick.bind(this));
+  }
 
-      const test = document.elementFromPoint(e.clientX, e.clientY); 
-      const allSpan = test.querySelectorAll('.slider__steps span'); 
-      const stepWidth = sliderRect.width / (steps - 1);
-      const sliderClick = Math.round((e.clientX - sliderRect.left) / stepWidth);
+  onClick(e) {
+    const sliderRect = this.elem.getBoundingClientRect();
+    const stepWidth = sliderRect.width / (this.steps - 1);
+    const sliderClick = Math.round((e.clientX - sliderRect.left) / stepWidth);
 
-      this.elem.querySelector('.slider__value').textContent = sliderClick;
-      const percent = sliderClick / (this.steps -1)*100;
-      this.elem.querySelector('.slider__thumb').style.left = `${percent}%`;
-      this.elem.querySelector('.slider__progress').style.width = `${percent}%`;
+    this.updateSlider(sliderClick);
+  }
 
-      this.value = sliderClick;
+  updateSlider(value) {
+    const percent = (value / (this.steps - 1)) * 100;
+    this.elem.querySelector('.slider__value').textContent = value;
+    this.elem.querySelector('.slider__thumb').style.left = `${percent}%`;
+    this.elem.querySelector('.slider__progress').style.width = `${percent}%`;
+    this.value = value;
 
-      allSpan.forEach((span) => span.classList.remove('slider__step-active'));
-      const activeSpan = this.elem.querySelectorAll('.slider__steps span')[this.value];
-      if(activeSpan) activeSpan.classList.add('slider__step-active');
-
-      const event = new CustomEvent ('slider-change', {
-        detail: this.value,
-        bubbles: true
-      });
-      this.elem.dispatchEvent(event);
+    this.elem.querySelectorAll('.slider__steps span').forEach((span, index) => {
+      span.classList.toggle('slider__step-active', index === value);
     });
-  } 
+
+    const event = new CustomEvent('slider-change', {
+      detail: this.value,
+      bubbles: true,
+    });
+    this.elem.dispatchEvent(event);
+  }
 }

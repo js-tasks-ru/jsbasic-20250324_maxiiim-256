@@ -21,80 +21,92 @@ export default class StepSlider {
       const sliderStep = createElement(`
         <span></span>
         `);
-        if(i === value) sliderStep.classList.add('slider__step-active');
+      if(i === value) sliderStep.classList.add('slider__step-active');
       this.elem.querySelector('.slider__steps').append(sliderStep);
-    };
-
-    this.elem.addEventListener('click', (e) => {
-      const sliderRect = this.elem.getBoundingClientRect();
-
-      const clickPos = document.elementFromPoint(e.clientX, e.clientY); 
-      const allSpan = clickPos.querySelectorAll('.slider__steps span'); 
-      const stepWidth = sliderRect.width / (steps - 1);
-      const sliderClick = Math.round((e.clientX - sliderRect.left) / stepWidth);
-
-      this.elem.querySelector('.slider__value').textContent = sliderClick;
-      const percent = sliderClick / (this.steps -1)*100;
-      this.elem.querySelector('.slider__thumb').style.left = `${percent}%`;
-      this.elem.querySelector('.slider__progress').style.width = `${percent}%`;
-
-      this.value = sliderClick;
-
-      allSpan.forEach((span) => span.classList.remove('slider__step-active'));
-      const activeSpan = this.elem.querySelectorAll('.slider__steps span')[this.value];
-      if(activeSpan) activeSpan.classList.add('slider__step-active');
-
-      const event = new CustomEvent ('slider-change', {
-        detail: this.value,
-        bubbles: true
-      });
-      this.elem.dispatchEvent(event);
-    });
+    }
 
     const thumb = this.elem.querySelector('.slider__thumb');
+    thumb.ondragstart = () => false;
+
+    this.elem.addEventListener('click', (e) => {
+      this.onClick(e);
+    });
+
     thumb.addEventListener('pointerdown', (e) => {
       e.preventDefault();
 
-      document.body.style.userSelect = 'none';
-      this.onMoveBind = this.onMove.bind(this);
-      this.onUpBind = this.onUp.bind(this);
-      document.addEventListener('pointermove',this.onMoveBind);
-      document.addEventListener('pointerup',this.onUpBind);
-    });
-  } 
+      this.elem.classList.add('slider_dragging');
 
-  onMove(e) {
+      document.addEventListener('pointermove', this.onMove);
+      document.addEventListener('pointerup', this.onUp);
+    });
+  }
+
+  onClick(e) {
     const sliderRect = this.elem.getBoundingClientRect();
     const stepWidth = sliderRect.width / (this.steps - 1);
+    const sliderClick = Math.round((e.clientX - sliderRect.left) / stepWidth);
 
-    let sliderClick = Math.round((e.clientX - sliderRect.left) / stepWidth);
-    sliderClick = Math.min(Math.max(sliderClick, 0), this.steps - 1); // Ограничение границ
-    const percent = (sliderClick / (this.steps - 1)) * 100;
+    this.updateSlider(sliderClick);
+  }
 
-    this.elem.querySelector('.slider__value').textContent = sliderClick;
+  updateSlider(value) {
+    const percent = (value / (this.steps - 1)) * 100;
+    this.elem.querySelector('.slider__value').textContent = value;
     this.elem.querySelector('.slider__thumb').style.left = `${percent}%`;
     this.elem.querySelector('.slider__progress').style.width = `${percent}%`;
-
-    this.value = sliderClick;
-    this.elem.querySelector('.slider__thumb').classList.add('slider_dragging');
+    this.value = value;
 
     this.elem.querySelectorAll('.slider__steps span').forEach((span) => {
       span.classList.remove('slider__step-active');
     });
+
     const activeSpan = this.elem.querySelectorAll('.slider__steps span')[this.value];
     if (activeSpan) activeSpan.classList.add('slider__step-active');
 
-    const event = new CustomEvent ('slider-change',{
+    const event = new CustomEvent('slider-change', {
       detail: this.value,
-      bubbles: true
-    })
+      bubbles: true,
+    });
     this.elem.dispatchEvent(event);
   }
-  onUp() {
-    document.body.style.userSelect = '';
-    this.elem.querySelector('.slider__thumb').classList.remove('slider_dragging');
 
-    document.removeEventListener('pointermove', this.onMoveBind);
-    document.removeEventListener('pointerup', this.onUpBind);
-  }
+
+  onMove = (e) => {
+    e.preventDefault(); // 
+
+    const sliderRect = this.elem.getBoundingClientRect();
+    let left = e.clientX - sliderRect.left;
+    let leftRelative = left / this.elem.offsetWidth;
+
+    // Ограничиваем значение в пределах [0, 1]
+    if (leftRelative < 0) leftRelative = 0;
+    if (leftRelative > 1) leftRelative = 1;
+
+    const leftPercents = leftRelative * 100;
+
+    this.elem.querySelector('.slider__thumb').style.left = `${leftPercents}%`;
+    this.elem.querySelector('.slider__progress').style.width = `${leftPercents}%`;
+
+    const segments = this.steps - 1;
+    const approximateValue = leftRelative * segments;
+    const value = Math.round(approximateValue);
+
+    this.elem.querySelector('.slider__value').textContent = value;
+
+    this.elem.querySelectorAll('.slider__steps span').forEach((span, index) => {
+      span.classList.toggle('slider__step-active', index === value);
+    });
+  };
+
+  onUp = () => {
+    document.removeEventListener('pointermove', this.onMove);
+    document.removeEventListener('pointerup', this.onUp);
+
+    this.elem.classList.remove('slider_dragging'); // Убираем класс для стилей
+
+    // Фиксируем значение после окончания перетаскивания
+    const value = +this.elem.querySelector('.slider__value').textContent;
+    this.updateSlider(value);
+  };
 }

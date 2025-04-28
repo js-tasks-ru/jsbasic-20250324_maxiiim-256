@@ -21,6 +21,11 @@ export default class CartIcon {
           <span class="cart-icon__price">€${cart.getTotalPrice().toFixed(2)}</span>
         </div>`;
 
+      this.topCoord = this.elem.getBoundingClientRect().top + window.pageYOffset;
+      this.leftIndent = Math.min(
+        document.querySelector('.container').getBoundingClientRect().right + 20,
+        document.documentElement.clientWidth - this.elem.offsetWidth - 10
+      ) + 'px';
       this.updatePosition();
 
       this.elem.classList.add('shake');
@@ -39,6 +44,34 @@ export default class CartIcon {
   }
 
   updatePosition() {
-    // ваш код ...
+    if(window.pageYOffset > this.topCoord){
+      Object.assign(this.elem.style, {
+        position: 'fixed',
+        top: '50px',
+        zIndex: 1e3,
+        right: '10px',
+        left: this.leftIndent
+      });
+    }
+    else{
+      Object.assign(this.elem.style, {
+        position: '',
+        top: '',
+        zIndex: '',
+        right: '',
+        left:''
+      });
+    }
+    let isMobile = document.documentElement.clientWidth <= 767;
+    if(isMobile){
+      Object.assign(this.elem.style, {
+        position: '',
+        top: '',
+        zIndex: '',
+        right:'',
+        left:''
+      });
+      return;
+    }
   }
 }

@@ -31,7 +31,6 @@ export default class Modal {
   
   open(){
     document.body.append(this.elem);
-    // document.body.querySelector(".modal__body").classList.add("is-modal-open");
     document.body.classList.add("is-modal-open");
     document.addEventListener('keydown', this.onkeydown);
   };
