@@ -18,8 +18,6 @@ export default class RibbonMenu {
 
     const inner = this.elem.querySelector(".ribbon__inner");
 
-// Добавить класс ribbon__item_active для первого элемента
-
     for(const category of categories){
       const ribbonItem = createElement(`
         <a href="#" class="ribbon__item" data-id="${category.id}">${category.name}</a>
